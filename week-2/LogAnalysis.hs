@@ -11,7 +11,6 @@ parseMessage line =
         (['W']:t:xs) -> LogMessage Warning (read t) (unwords xs)
         xs -> Unknown (unwords xs)
         
-
--- parseMessage "E 2 562 help help"== LogMessage (Error 2) 562 "help help"
--- parseMessage "I 29 la la la"== LogMessage Info 29 "la la la"
--- parseMessage "This is not in the right format"== Unknown "This is not in the right format"
+parse :: String -> [LogMessage]
+parse fileAsString =
+    map parseMessage (lines fileAsString)
