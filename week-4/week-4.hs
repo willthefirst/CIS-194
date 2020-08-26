@@ -42,9 +42,25 @@ fun2' x
 
 -- Exercise 2 [INCOMPLETE]
 
--- data Tree a = Leaf
---             | Node Integer (Tree a) a (Tree a)
---         deriving (Show, Eq)
+data Tree a = Leaf
+            | Node Integer (Tree a) a (Tree a)
+        deriving (Show, Eq)
+
+foldTree :: [a] -> Tree a
+foldTree [x] = Node 0 Leaf x Leaf
+foldTree x:xs  =
+    foldr (\y acc -> Node _ acc y ) foldTree [x] xs
+
+
+    foldTree [x] -- Node 0 Leaf "A" Leaf
+
+
+    foldr (\y acc -> Node _ foldTree y ) Leaf xs
+
+-- "ABCDEFGHIJ"
+
+
+-- old stuff
 
 -- half :: [a] -> ([a],[a])
 -- half [] = ([],[])
