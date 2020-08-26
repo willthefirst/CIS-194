@@ -1,4 +1,4 @@
--- Exercise 1
+-- Exercise 1 [WORKS, BUT SEEMS COMPLICATED]
 
 -- If it contains 2, 0. otherwise, multiplies every even (number - 2) together.
 fun1' :: [Integer] -> Integer
@@ -11,18 +11,25 @@ fun2 n
     | otherwise = fun2 (3 * n + 1)
 
 fun2' :: Integer -> Integer
-fun2' x = x + 4
+fun2' 2 = 0
+fun2' x
+    | odd x = fun2' (3 * x + 1)
+    | otherwise =
+        let
+            halves = takeWhile even $ iterate (`div` 2) x
+            notBase2 = last halves /= 2
+        in
+            if notBase2 then sum halves + (fun2' $ (last halves) `div` 2)
+            else sum halves
 
--- We only are adding up even numbers. The lowest even numbers that come as result of 3*n + 1 + all power of 2 numbers for lowest possible 3*n. 
--- If it's a power of 2, we can iterate iterate powers of 2 from 2, and take everything that's smaller than n, and add it up.
--- else, 3*n + 1, 
+-- We only add up even numbers.
+-- If the even number isn't base 2, add up it's halves until we hit an odd number, then recurse.
 
--- fun2 3
--- = fun2 (3 * 3 + 1)
+-- fun2 3 -- Dang, 3 is odd. Inflate it to a bigger even number.
+-- = fun2 (3 * 3 + 1) 
 -- = fun2 (10)
--- -- It was odd, so we multiplied by 3 and incremented by 1 (to get an even number)
 -- = 10 +  fun2 (10 / 2)
---         = fun2 (5) -- when divided by 2, we hit a prime, 5.
+--         = fun2 (5) -- Dang, 5 is odd. This means that 10 is not a number with base 2.
 --         = fun2 (3 * 5 + 1)
 --         = fun2 (16)
 --         = 16 +  fun2 (16 / 2)
@@ -30,22 +37,10 @@ fun2' x = x + 4
 --                 = 8 +   fun2 (8/2)
 --                         = fun2 (4)
 --                         = 4 +   fun2 (2)
---            log                     = 2 +   fun2 1
+--                                 = 2 +   fun2 1
 --                                         0
 
--- fun2 4
--- = 4 + fun2 (2)
--- = 4 + (2 + fun2 1)
--- = 4 + (2 + 0)
--- = 6
-
-
--- If x odd, it turned even by being * 3 and + 1.
--- If x even, x + fun 2 (x - 2)
---      If x == 2^n, giving us x^n + x^n-1 + x^n-2 etc. 
---      Otherwise, x/2 repeatedly until x is odd, then try again.
-
--- Exercise 2
+-- Exercise 2 [INCOMPLETE]
 
 -- data Tree a = Leaf
 --             | Node Integer (Tree a) a (Tree a)
@@ -84,7 +79,6 @@ map' f xs = foldr (\x acc -> f x : acc) [] xs
 cartProd :: [a] -> [b] -> [(a, b)]
 cartProd xs ys = [(x,y) | x <- xs, y <- ys]
 
--- Given n, generate all the odd prime numbers up to 2n+2
 sieveSundaram :: Integer -> [Integer]
 sieveSundaram n =
     let
