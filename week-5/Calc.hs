@@ -99,5 +99,3 @@ instance Expr VarExprT where
 --     lit x map = Just x
 --     add x y map = M.lookup x map + M.lookup lit y map
 --     mul x y map =  x
-
-
