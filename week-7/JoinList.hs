@@ -20,14 +20,19 @@ tag (Append m _ _) = m
 -- Exercise 2
 
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
-indexJ _ Empty                          = Nothing
-indexJ i _ | i < 0                      = Nothing
-indexJ i jl
-    | i >= (getSize $ size (tag jl))    = Nothing 
-indexJ 0 (Single b a)                   = Just a
+indexJ _ Empty                  = Nothing
+indexJ i _  | i < 0             = Nothing
+indexJ i jl | i >= sizeOf jl    = Nothing 
+indexJ 0 (Single b a)           = Just a
 indexJ i (Append b jl1 jl2)
-    | i < (getSize $ size (tag jl1))    = indexJ (i) jl1
-    | otherwise                         = indexJ (i - (getSize $ size (tag jl1))) jl2
+    | i < sizeOf jl1            = indexJ (i) jl1
+    | otherwise                 = indexJ (i - sizeOf jl1) jl2
+
+-- Returns size of a JoinList
+sizeOf :: (Sized b, Monoid b) => JoinList b a -> Int
+sizeOf Empty  = (-1)
+sizeOf jl     = getSize $ size (tag jl) 
+
 
 -- Utilities for testing
 jlToList :: JoinList m a -> [a]
