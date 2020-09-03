@@ -144,3 +144,4 @@ modCurLine f = do
   l  <- getCurLine
   nl <- onBuffer numLines
   setCurLine . max 0 . min (nl - 1) $ f l
+
