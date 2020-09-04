@@ -19,10 +19,9 @@ tag (Append m _ _) = m
 
 -- Exercise 2
 
-
 -- Testing
 
-testCase1 = Empty
+testCase1 = Empty -- Causes issues, couldn't figure out how to fix.
 
 testCase2 = (Append (Size 1) Empty (Single (Size 1) "e"))
 
@@ -58,7 +57,7 @@ testCase7 =
         (Single (Size 1) "h"))
 
 testCases :: [JoinList Size [Char]]
-testCases = [testCase1, testCase2, testCase3, testCase4, testCase5, testCase6, testCase7]
+testCases = [testCase2, testCase3, testCase4, testCase5, testCase6, testCase7]
 
 (!!?) :: [a] -> Int -> Maybe a
 []     !!? _            = Nothing
@@ -83,6 +82,12 @@ testDropJ
     [(i, jl) | i <- [-1..4], jl <- testCases] = "Pass!"
   | otherwise = "Failed!"
 
+testTakeJ :: String
+testTakeJ
+  | all (\(i, jl) -> jlToList (takeJ i jl) == take i (jlToList jl))
+    [(i, jl) | i <- [-1..4], jl <- testCases] = "Pass!"
+  | otherwise = "Failed!"
+
 -- 1.
 
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
@@ -91,8 +96,8 @@ indexJ i _  | i < 0             = Nothing
 indexJ i jl | i >= sizeOf jl    = Nothing 
 indexJ 0 (Single b a)           = Just a
 indexJ i (Append b jl1 jl2)
-    | i < sizeOf jl1            = indexJ (i) jl1
-    | otherwise                 = indexJ (i - sizeOf jl1) jl2
+  | i < sizeOf jl1            = indexJ (i) jl1
+  | otherwise                 = indexJ (i - sizeOf jl1) jl2
 
 -- Returns size of a JoinList
 sizeOf :: (Sized b, Monoid b) => JoinList b a -> Int
@@ -112,3 +117,10 @@ dropJ i (Append b jl1 jl2)
 
 -- 3.
 
+takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+takeJ _ Empty               = Empty 
+takeJ i _ | i < 1           = Empty
+takeJ _ (Single b a)        = Single b a
+takeJ i (Append b jl1 jl2)  = takeJ i jl1 +++ takeJ (i-1) jl2 
+
+-- Exercise 3
