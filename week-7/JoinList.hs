@@ -1,6 +1,10 @@
+{-# LANGUAGE FlexibleInstances, TypeSynonymInstances #-}
+
 module JoinList where
 
 import Sized
+import Scrabble
+import Buffer
 
 data JoinList m a = Empty
                 | Single m a
@@ -46,7 +50,7 @@ testCase6 =
               (Single (Size 1) "a")
               (Append (Size 1) (Single (Size 1) "e") Empty))
             (Single (Size 1) "y")))
-
+    
 testCase7 =
     (Append (Size 4)
         (Append (Size 3)
@@ -70,11 +74,19 @@ jlToList Empty            = []
 jlToList (Single _ a)     = [a]
 jlToList (Append _ l1 l2) = jlToList l1 ++ jlToList l2
 
-testIndexJ :: String
-testIndexJ
+testIndexJ :: (Int -> JoinList Size [Char] -> Maybe [Char]) -> IO ()
+testIndexJ indexJ
   | all (\(i, jl) -> (indexJ i jl) == (jlToList jl !!? i))
-    [(i, jl) | i <- [-1..4], jl <- testCases] = "Pass!"
-  | otherwise = "Failed!"
+    [(i, jl) | i <- [-1..4], jl <- testCases] = putStr "Pass!\n"
+  | otherwise = putStr $ "Failed!\nTest case: indexJ "++ show i ++ " (" ++ show jl
+              ++ ")\nExpecting: " ++ show expecting
+              ++ "\nGetting: " ++ show getting ++ "\n"
+    where failedCase = head $ filter (\(i, jl) -> (indexJ i jl) /= (jlToList jl !!? i))
+                        [(i, jl) | i <- [-1..4], jl <- testCases]
+          expecting = (\(i, jl) -> (jlToList jl !!? i)) failedCase
+          getting = (\(i, jl) -> (indexJ i jl)) failedCase
+          i = fst failedCase
+          jl = snd failedCase
 
 testDropJ :: String
 testDropJ
@@ -94,10 +106,11 @@ indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
 indexJ _ Empty                  = Nothing
 indexJ i _  | i < 0             = Nothing
 indexJ i jl | i >= sizeOf jl    = Nothing 
-indexJ 0 (Single b a)           = Just a
+indexJ 0 (Single _ a)           = Just a
+indexJ i (Single _ _)           = Nothing
 indexJ i (Append b jl1 jl2)
-  | i < sizeOf jl1            = indexJ (i) jl1
-  | otherwise                 = indexJ (i - sizeOf jl1) jl2
+  | i < sizeOf jl1              = indexJ (i) jl1
+  | otherwise                   = indexJ (i - (sizeOf jl1)) jl2
 
 -- Returns size of a JoinList
 sizeOf :: (Sized b, Monoid b) => JoinList b a -> Int
@@ -123,4 +136,9 @@ takeJ i _ | i < 1           = Empty
 takeJ _ (Single b a)        = Single b a
 takeJ i (Append b jl1 jl2)  = takeJ i jl1 +++ takeJ (i-1) jl2 
 
--- Exercise 3
+-- Exercise 3 (see Scrabble.hs for rest of code)
+
+scoreLine :: String -> JoinList Score String
+scoreLine s = Single (scoreString s) s
+
+-- Exercise 4 (see JoinListBuffer.hs)
