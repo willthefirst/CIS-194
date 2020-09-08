@@ -105,28 +105,24 @@ testTakeJ
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
 indexJ _ Empty                  = Nothing
 indexJ i _  | i < 0             = Nothing
-indexJ i jl | i >= sizeOf jl    = Nothing 
 indexJ 0 (Single _ a)           = Just a
 indexJ i (Single _ _)           = Nothing
 indexJ i (Append b jl1 jl2)
-  | i < sizeOf jl1              = indexJ (i) jl1
-  | otherwise                   = indexJ (i - (sizeOf jl1)) jl2
+  | i == 0                      = indexJ i jl1
+  | otherwise                   = indexJ (i - 1) jl2
 
 -- Returns size of a JoinList
 sizeOf :: (Sized b, Monoid b) => JoinList b a -> Int
 sizeOf Empty  = 0
 sizeOf jl     = getSize $ size (tag jl) 
-
+ 
 -- 2.
 
 dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
 dropJ i jl | i < 1      = jl
 dropJ _ Empty           = Empty
-dropJ i jl 
-    | i >= sizeOf jl    = Empty
-dropJ i (Append b jl1 jl2)             
-    | i <= sizeOf jl1   = (dropJ i jl1) +++ jl2 
-    | otherwise         = dropJ (i - sizeOf jl1) jl2
+dropJ i (Single _ _)    = Empty
+dropJ i (Append b jl1 jl2) = dropJ (i-1) jl2 
 
 -- 3.
 
@@ -135,6 +131,24 @@ takeJ _ Empty               = Empty
 takeJ i _ | i < 1           = Empty
 takeJ _ (Single b a)        = Single b a
 takeJ i (Append b jl1 jl2)  = takeJ i jl1 +++ takeJ (i-1) jl2 
+
+
+-- testBuffer = 
+--   (Append (Score 346,Size 40) 
+--       (Single (Score 88,Size 8) "This Web site includes information about Project Gutenberg-tm, ") 
+--       (Append (Score 258,Size 32) 
+--           (Single (Score 87,Size 10) " including how to make donations to the Project Gutenberg y ") 
+--               (Append (Score 171,Size 22) 
+--                   (Single (Score 97,Size 12) " Archive Foundation, how to help produce our new eBooks, and how to ") 
+--                   (Append (Score 74,Size 10) 
+--                       (Single (Score 74,Size 10) " subscribe to our email newsletter to hear about new eBooks.") 
+--                       Empty
+--                   )
+--               )
+--           ))
+
+
+
 
 -- Exercise 3 (see Scrabble.hs for rest of code)
 

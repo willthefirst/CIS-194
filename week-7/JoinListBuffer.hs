@@ -10,12 +10,11 @@ import Scrabble
 instance Buffer (JoinList (Score, Size) String) where
     toString              = unlines . jlToList
     fromString s          =
-        foldr (\line acc -> acc +++ newJL line) Empty $ (reverse . lines) s 
-            where newJL str = Single (scoreString str, Size 1) str
+        foldl (\acc line -> newJL line +++ acc) Empty (reverse (lines s)) 
+            where newJL str = Single (scoreString str, Size (length $ words str)) str
     line                  = indexJ
     replaceLine n s jl    = replaceLine' (takeJ n jl) (dropJ n jl)
         where replaceLine' pre Empty    = pre
-              replaceLine' pre post     = pre +++ (Single (scoreString s, 1) s) +++ post
+              replaceLine' pre post     = pre +++ (Single (scoreString s, Size (length $ words s)) s) +++ post
     numLines              = length . jlToList
     value                 = sizeOf
-
