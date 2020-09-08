@@ -147,7 +147,9 @@ takeJ i (Append b jl1 jl2)  = takeJ i jl1 +++ takeJ (i-1) jl2
 --               )
 --           ))
 
-
+    -- replaceLine n s jl    = replaceLine' (takeJ n jl) (dropJ n jl)
+    --     where replaceLine' pre Empty    = pre
+    --           replaceLine' pre post     = pre +++ (Single (scoreString s, Size (length $ words s)) s) +++ post
 
 
 -- Exercise 3 (see Scrabble.hs for rest of code)
