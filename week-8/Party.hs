@@ -23,22 +23,19 @@ moreFun gl1 gl2
 -- 2.
 
 treeFold :: (b -> a -> b) -> b -> Tree a -> b
-treeFold f z (Node l [])        = f z l
-treeFold f z (Node l [t])       = treeFold f (f z l) t 
-treeFold f z (Node l (t:ts))    = foldl (\acc x -> (treeFold f acc x)) (treeFold f (f z l) t) ts
+treeFold f z (Node r [])        = f z r
+treeFold f z (Node r [t])       = treeFold f (f z r) t 
+treeFold f z (Node r (t:ts))    = foldl (\acc -> (treeFold f acc)) (treeFold f (f z r) t) ts
 
 testTree :: Tree Int
 testTree = (Node 2
         [ Node 3 []
-        , Node 10 []
+        , Node 10 
+            [ Node 11 
+                [ Node 12 []
+                ]
+            ]
         ]
     )
 
 testTreeFold = treeFold (\acc t -> acc + t) 0 testTree 
--- = foldl (\acc x ->      (treeFold f    acc         x)) (treeFold f (f z l)       t)            ts
--- = foldl (\acc x ->      (treeFold f    acc         x)) (treeFold f (f 0 2) (Node 3 [])) [(Node 10 [])]
--- = foldl (\acc x ->      (treeFold f    acc         x)) (treeFold f (  2  ) (Node 3 [])) [(Node 10 [])]
--- = foldl (\acc x ->      (treeFold f    acc         x)) (               5              ) [(Node 10 [])]
--- = (\5 (Node 10 []) ->   (treeFold f    5 (Node 10 [])))
--- = (treeFold f (f 5 2) (Node 10 [])))
--- = 
