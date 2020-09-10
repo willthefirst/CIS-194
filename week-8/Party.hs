@@ -20,7 +20,7 @@ moreFun gl1 gl2
     | (compare gl1 gl2 == LT) = gl2
     | otherwise               = gl1
     
--- 2.
+-- 2
 
 treeFold :: (b -> a -> b) -> b -> Tree a -> b
 treeFold f z (Node r [])        = f z r
@@ -38,4 +38,9 @@ testTree = (Node 2
         ]
     )
 
-testTreeFold = treeFold (\acc t -> acc + t) 0 testTree 
+testTreeFold = treeFold (\acc t -> acc + t) 0 testTree
+
+-- 3
+
+-- See howToParty.md for reasoning in English.
+
