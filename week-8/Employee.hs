@@ -44,4 +44,25 @@ testCompany2
       ]
     ]
 
+-- Some more test cases
 
+testCompanyL1 :: Tree Employee
+testCompanyL1
+  = Node (Emp "Stan" 9) []
+
+testCompanyL2 :: Tree Employee
+testCompanyL2
+  = Node (Emp "Stan" 9)
+    [ Node (Emp "Bob" 3) []
+    , Node (Emp "Sarah" 17) []
+    ]
+
+testCompanyL3 :: Tree Employee
+testCompanyL3
+  = Node (Emp "Stan" 9)
+    [ Node (Emp "Bob" 2)
+      [ Node (Emp "Joe" 5) []
+      , Node (Emp "Fred" 3) []
+      ]
+    , Node (Emp "Sarah" 17) []
+    ]
