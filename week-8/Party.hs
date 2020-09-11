@@ -42,44 +42,10 @@ testTreeFold = treeFold (\acc t -> acc + t) 0 testTree
 
 -- 3
 
--- See howToParty.md for reasoning in English.
-
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
--- L1 company When nobody but the boss (comes, doesn't come) to the party.
-nextLevel 
-    b@(Emp _ f) [((GL [] _), (GL [] _))]
-        = (GL [b] f, mempty)
--- L2 company
-nextLevel 
-    b@(Emp _ f) [(_, l2s)]
-        = (bossOnly, moreFun bossOnly l2s)
-            where bossOnly = GL [b] f
--- L3 company
-nextLevel
-    b [(GL [] 0, l2s), (l3s, _)]
-        = (glCons b l3s, moreFun l2s l3s)
--- L4+ company
-nextLevel
-    b ((GL [] 0, l2s):lsX)
-        = ( glCons b (moreFun l3 l4 ) , $$$ )
-        = ( snd ( nextLevel b lsX )   , $$$ )
-        = ( snd ( nextLevel b [(l3,l3'), (l4, l4')])   , $$$ )
-        = ( snd ( nextLevel b [(l3,l3'), (l4, l4')])   , $$$ )
+nextLevel b@(Emp _ f) [((GL [] _), gl2)] = (GL [b] f, gl2)
+nextLevel b@(Emp _ fun) gls = 
+    foldr f (GL [b] fun, GL [] 0) gls
+        where f = (\(gl1, gl2) acc -> (fst acc <> gl2 , snd acc <> (moreFun gl1 gl2)))
 
 
-boss ++ (greatest between l3s and l4s)
-
-nextLevel: boss [(l3s, l3s'), (l4s, l4s')]
-= 
-
-
-
--- Other tests
- 
-emily = Emp "Emily" 5
-bob = Emp "Bob" 4
-dave = Emp "Dave" 5
-
-gl1 = GL [emily] 5
-gl2 = glCons bob (glCons dave (GL [] 0))
-gl3 = gl1 <> gl2
