@@ -49,7 +49,7 @@ testTree = (Node 2
             ]
         ]
     )
-    
+
 -- Some more test cases
 
 testCompanyL1 :: Tree Employee
@@ -117,6 +117,3 @@ bestWithoutFred = glCons hitler (GL [] 0)
 fredsBestLists = (bestWithFred, bestWithoutFred)
 
 testNextLevel = nextLevel emily [bobsBestLists, fredsBestLists]
-
--- Exercise four
--- testMaxFun = maxFun testCompanyL1'

@@ -4,6 +4,7 @@ import Employee
 import GuestList
 import Data.Tree
 import Debug.Trace
+import System.IO
 
 --1.1
 
@@ -47,3 +48,13 @@ maxFun t = uncurry moreFun $ treeFold nextLevel (mempty, mempty) t
 
 -- 5
 
+main :: IO ()
+main = do
+    handle <- openFile "company.txt" ReadMode  
+    contents <- hGetContents handle
+    let bestGL = maxFun . stringToTree $ contents
+    print bestGL  
+    hClose handle  
+
+stringToTree :: String -> Tree Employee
+stringToTree s = read s
