@@ -3,6 +3,7 @@ module Party where
 import Employee
 import GuestList
 import Data.Tree
+import Debug.Trace
 
 --1.1
 
@@ -22,30 +23,27 @@ moreFun gl1 gl2
     
 -- 2
 
-treeFold :: (b -> a -> b) -> b -> Tree a -> b
-treeFold f z (Node r [])        = f z r
-treeFold f z (Node r [t])       = treeFold f (f z r) t 
-treeFold f z (Node r (t:ts))    = foldl (\acc -> (treeFold f acc)) (treeFold f (f z r) t) ts
-
-testTree :: Tree Int
-testTree = (Node 2
-        [ Node 3 []
-        , Node 10 
-            [ Node 11 
-                [ Node 12 []
-                ]
-            ]
-        ]
-    )
-
-testTreeFold = treeFold (\acc t -> acc + t) 0 testTree
+treeFold :: (a -> [b] -> b) -> b -> Tree a -> b
+treeFold f i (Node {rootLabel = r, subForest = s})
+  = f r (map (treeFold f i) s) 
 
 -- 3
 
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
-nextLevel b@(Emp _ f) [((GL [] _), gl2)] = (GL [b] f, gl2)
 nextLevel b@(Emp _ fun) gls = 
     foldr f (GL [b] fun, GL [] 0) gls
         where f = (\(gl1, gl2) acc -> (fst acc <> gl2 , snd acc <> (moreFun gl1 gl2)))
 
+-- 4
+
+testCompanyHere'
+  = Node (Emp "Stan" 1)
+    [ Node (Emp "Stewart" 9) []
+    , Node (Emp "Fin" 2) []
+    ]
+
+maxFun :: Tree Employee -> GuestList
+maxFun t = uncurry moreFun $ treeFold nextLevel (mempty, mempty) t
+
+-- 5
 
