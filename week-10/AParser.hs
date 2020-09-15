@@ -9,7 +9,7 @@ import           Control.Applicative
 import           Data.Char
 
 -- A parser for a value of type a is a function which takes a String
--- represnting the input to be parsed, and succeeds or fails; if it
+-- representing the input to be parsed, and succeeds or fails; if it
 -- succeeds, it returns the parsed value along with the remainder of
 -- the input.
 newtype Parser a = Parser { runParser :: String -> Maybe (a, String) }
@@ -57,3 +57,12 @@ posInt = Parser f
 ------------------------------------------------------------
 -- Your code goes below here
 ------------------------------------------------------------
+
+-- Applies f to the first argument of (a, c)
+first :: (a -> b) -> (a, c) -> (b, c)
+first f (x, y) = (f x, y)
+
+-- 1
+
+instance Functor Parser where
+  fmap f (Parser { runParser = rp }) = Parser (fmap (first f) . rp)
