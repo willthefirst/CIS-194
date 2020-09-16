@@ -65,4 +65,19 @@ first f (x, y) = (f x, y)
 -- 1
 
 instance Functor Parser where
-  fmap f (Parser { runParser = rp }) = Parser (fmap (first f) . rp)
+  fmap f (Parser p) = Parser (fmap (first f) . p)
+
+-- 2
+
+instance Applicative Parser where
+  pure a = Parser (\s -> Just (a, s))
+  p1 <*> p2 = Parser (\s ->
+      case runParser p1 s of
+        Nothing -> Nothing
+        Just (f, s') -> runParser (f <$> p2) s'
+    )
+    
+-- (<*>) :: f (a -> b) -> f a -> f b  
+
+-- p1 == Parser (a -> b)
+--    == Parser (\s -> Maybe ((a -> b), s) )
