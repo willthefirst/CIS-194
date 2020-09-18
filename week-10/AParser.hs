@@ -4,7 +4,7 @@
 
 module AParser where
 
-import           Control.Applicative
+import           Control.Applicative()
 
 import           Data.Char
 
@@ -58,11 +58,10 @@ posInt = Parser f
 -- Your code goes below here
 ------------------------------------------------------------
 
--- Applies f to the first argument of (a, c)
+-- 1
+
 first :: (a -> b) -> (a, c) -> (b, c)
 first f (x, y) = (f x, y)
-
--- 1
 
 instance Functor Parser where
   fmap f (Parser p) = Parser (fmap (first f) . p)
@@ -76,8 +75,64 @@ instance Applicative Parser where
         Nothing -> Nothing
         Just (f, s') -> runParser (f <$> p2) s'
     )
-    
--- (<*>) :: f (a -> b) -> f a -> f b  
 
--- p1 == Parser (a -> b)
---    == Parser (\s -> Maybe ((a -> b), s) )
+
+-- if p1 = char 'a'
+--   then runParser p1 s = Just ('a', "bcd")
+
+-- if p1 = 
+--         runParser (  ) "abcd" = Just ((\x -> ('a' , x) ), "bcd") 
+
+--   where p1 = (\maybeA -> 
+--     | char maybeA == Nothing = Nothing
+--     | otherwise = (\maybeB -> (maybeA, maybeB)))
+
+
+-- !!   then runParser p1 s = Just ((\x -> ('a' , x) ), "bcd")
+
+-- which is of type        
+-- but we need it to type = __Just (f, "bcd") __ <<<< FIGURE THAT OUT !!
+
+--                           Just ((\x -> ('a' , x) ), "bcd")
+
+
+--                    (of form Just (f, s'))
+-- knowing that we then need to run runParser (f <$> p2) s' 
+
+-- runParser (f <$> p2) s' 
+--           (Parser (fmap (first f) . p2)) s'
+
+--                                                 char 'b' . s' $ "bcd"
+--   when p1 = char 'a')         Just ('a', "bcd") Just ('b',"cd")
+--   (when p1 = ______)  fmap (first f)            Just ('b',"cd")
+
+-- i need to write a function where
+  
+--  f = x -> ('a' , x)  
+
+-- runParser (fmap f p2) s'
+-- runParser (fmap __ (char 'b') ) "bcdef"
+
+-- runParser p1 s
+-- runParser (fmap (\c -> (\_ -> (c, 'b'))) (char 'a') ) $ "abcdef" 
+-- ...
+-- Just (f, s')
+
+
+-- ap = (fmap (\c -> (\_ -> (c, 'b'))) (char 'a') ) $ "abcdef" 
+-- bp = (char 'b')
+-- abp = ap <*> bp ("abcdef")
+-- Parser (p -> (Char, Char)) -> Parser Char -> Parser (Char, Char)
+
+-- 3
+
+abParser :: Parser (Char, Char)
+abParser = checkForA <*> (char 'b')
+  where checkForA = Parser testForA
+        
+testForA :: String -> Maybe ((Char -> (Char, Char)), String)
+testForA s =
+  case runParser (char 'a') s of
+      Just ('a', rest) -> Just (\maybeB -> ('a', maybeB), rest)
+      _ -> Nothing
+  
