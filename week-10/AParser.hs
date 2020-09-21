@@ -96,3 +96,8 @@ instance Alternative Parser where
 
 -- 5
    
+intOrUppercase :: Parser ()
+intOrUppercase =
+  const () <$> posInt 
+  <|> const () <$> upper
+    where upper = satisfy isUpper :: Parser Char
