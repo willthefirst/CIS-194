@@ -90,3 +90,9 @@ intPair = liftA3 f posInt (char ' ') posInt
 
 -- 4
 
+instance Alternative Parser where
+  empty = Parser (\_ -> Nothing)
+  f1 <|> f2 = Parser (\s -> (runParser f1 s) <|> (runParser f2 s))
+
+-- 5
+   
