@@ -4,7 +4,7 @@
 
 module AParser where
 
-import           Control.Applicative()
+import           Control.Applicative
 
 import           Data.Char
 
@@ -79,10 +79,14 @@ instance Applicative Parser where
 -- 3
 
 abParser :: Parser (Char, Char)
-abParser = Parser testForA <*> (char 'b')
-        
-testForA :: String -> Maybe ((Char -> (Char, Char)), String)
-testForA s =
-  case runParser (char 'a') s of
-      Just ('a', rest) -> Just (\maybeB -> ('a', maybeB), rest)
-      _ -> Nothing
+abParser = liftA2 (,) (char 'a') (char 'b')
+
+abParser_ :: Parser ()
+abParser_ = const () <$> abParser
+
+intPair :: Parser [Integer]
+intPair = liftA3 f posInt (char ' ') posInt
+  where f a _ b = [a, b]
+
+-- 4
+
