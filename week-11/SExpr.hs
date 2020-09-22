@@ -7,18 +7,17 @@ module SExpr where
 import AParser
 import Control.Applicative
 import           Data.Char
+import Debug.Trace
 
 ------------------------------------------------------------
 --  1. Parsing repetitions
 ------------------------------------------------------------
 
 zeroOrMore :: Parser a -> Parser [a]
-zeroOrMore p = undefined
+zeroOrMore p = oneOrMore p <|> pure []
 
 oneOrMore :: Parser a -> Parser [a]
-oneOrMore p = Parser (\s ->
-      undefined
-    )
+oneOrMore p = liftA2 (++) ((fmap (\x -> [x]) p)) (zeroOrMore p)
 
 ------------------------------------------------------------
 --  2. Utilities
@@ -47,3 +46,4 @@ data Atom = N Integer | I Ident
 data SExpr = A Atom
            | Comb [SExpr]
   deriving Show
+
