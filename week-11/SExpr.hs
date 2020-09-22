@@ -24,10 +24,12 @@ oneOrMore p = liftA2 (++) ((fmap (\x -> [x]) p)) (zeroOrMore p)
 ------------------------------------------------------------
 
 spaces :: Parser String
-spaces = undefined
+spaces = zeroOrMore (satisfy isSpace)
 
 ident :: Parser String
-ident = undefined
+ident = liftA2 (++) (oneOrMore (alphas)) (zeroOrMore (alphaNums))
+  where alphas = satisfy isAlpha
+        alphaNums = satisfy isAlphaNum
 
 ------------------------------------------------------------
 --  3. Parsing S-expressions
