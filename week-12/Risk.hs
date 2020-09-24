@@ -72,4 +72,16 @@ invade bf = do
   else
     invade bf'
 
-testInvade = evalRandIO (invade (Battlefield 1 7)) 
+testInvade = evalRandIO (invade (Battlefield 1 7))
+
+-- 4
+length' = fromIntegral . length
+
+successProb :: Battlefield -> Rand StdGen Double
+successProb bf = do 
+  games <- replicateM 1000 (invade bf)
+  aWins <- return (filter (\(Battlefield _ d) -> d == 0) games)
+  return $ fromRational ((length' aWins) / (length' games))
+
+testSuccessProb = evalRandIO $ successProb (Battlefield 21 21)  
+
