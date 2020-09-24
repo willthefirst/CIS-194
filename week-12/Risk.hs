@@ -31,23 +31,7 @@ type Army = Int
 
 data Battlefield = Battlefield { attackers :: Army, defenders :: Army } deriving Show
 
--- 1
-
-battle :: Battlefield -> Rand StdGen Battlefield
-battle (Battlefield a d) = do
-  aRolls <- return (attackerRolls a)
-  dRolls <- return (defenderRolls d)
-  rollResults <- return $ zipWith compare <$> aRolls <*> dRolls
-  (aLosses, dLosses) <- summedResults <$> rollResults
-  return (Battlefield (a - aLosses) (d - dLosses))
-
-summedResults :: [Ordering] -> (Int, Int)
-summedResults rolls =
-  foldr (\roll (a, d) -> 
-    if roll == GT then 
-      (a, (d + 1))
-    else 
-      (a + 1, d)) (0,0) rolls
+-- 2
 
 attackerRolls :: Army -> Rand StdGen [DieValue]
 attackerRolls size
@@ -61,4 +45,31 @@ defenderRolls size
   | otherwise  = reverse . sort <$> sequence rolls
       where rolls = replicate (min 2 size) die
 
+summedResults :: [Ordering] -> (Int, Int)
+summedResults rolls =
+  foldr (\roll (a, d) -> 
+    if roll == GT then 
+      (a, (d + 1))
+    else 
+      (a + 1, d)) (0,0) rolls
+
+battle :: Battlefield -> Rand StdGen Battlefield
+battle (Battlefield a d) = do
+  (aRolls, dRolls) <- return (attackerRolls a, defenderRolls d)
+  rollResults <- return $ zipWith compare <$> aRolls <*> dRolls
+  (aLosses, dLosses) <- summedResults <$> rollResults
+  return (Battlefield (a - aLosses) (d - dLosses))
+
 testBattle = evalRandIO (battle (Battlefield 3 2))
+
+-- 3 
+
+invade :: Battlefield -> Rand StdGen Battlefield
+invade bf = do
+  bf'@(Battlefield a d) <- battle bf
+  if a < 2 || d < 1 then
+    return bf'
+  else
+    invade bf'
+
+testInvade = evalRandIO (invade (Battlefield 1 7)) 
