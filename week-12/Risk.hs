@@ -23,6 +23,7 @@ instance Random DieValue where
 die :: Rand StdGen DieValue
 die = getRandom
 
+testDie :: IO DieValue
 testDie = evalRandIO (die)
 ------------------------------------------------------------
 -- Risk

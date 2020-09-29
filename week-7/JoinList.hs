@@ -6,7 +6,7 @@ import Sized
 import Scrabble
 import Buffer
 
-data JoinList m a = Empty
+data JoinList m a = Out
                 | Single m a
                 | Append m (JoinList m a) (JoinList m a)
     deriving (Eq, Show)
@@ -17,7 +17,7 @@ data JoinList m a = Empty
 (+++) jl1 jl2 = Append (tag jl1 <> tag jl2) jl1  jl2
 
 tag :: Monoid m => JoinList m a -> m
-tag Empty = mempty
+tag Out = mempty
 tag (Single m _) = m
 tag (Append m _ _) = m
 
@@ -25,11 +25,11 @@ tag (Append m _ _) = m
 
 -- Testing
 
-testCase1 = Empty -- Causes issues, couldn't figure out how to fix.
+testCase1 = Out -- Causes issues, couldn't figure out how to fix.
 
-testCase2 = (Append (Size 1) Empty (Single (Size 1) "e"))
+testCase2 = (Append (Size 1) Out (Single (Size 1) "e"))
 
-testCase3 = (Append (Size 1) (Single (Size 1) "e") Empty)
+testCase3 = (Append (Size 1) (Single (Size 1) "e") Out)
 
 testCase4 = (Single (Size 1) "e")
 
@@ -39,7 +39,7 @@ testCase5 =
         (Append (Size 3)
             (Single (Size 1) "y")
             (Append (Size 2)
-              (Append (Size 1) (Single (Size 1) "e") Empty)
+              (Append (Size 1) (Single (Size 1) "e") Out)
               (Single (Size 1) "a"))))
 
 testCase6 =
@@ -48,7 +48,7 @@ testCase6 =
         (Append (Size 3)
             (Append (Size 2)
               (Single (Size 1) "a")
-              (Append (Size 1) (Single (Size 1) "e") Empty))
+              (Append (Size 1) (Single (Size 1) "e") Out))
             (Single (Size 1) "y")))
     
 testCase7 =
@@ -56,7 +56,7 @@ testCase7 =
         (Append (Size 3)
             (Single (Size 1) "y")
             (Append (Size 2)
-              (Append (Size 1) (Single (Size 1) "e") Empty)
+              (Append (Size 1) (Single (Size 1) "e") Out)
               (Single (Size 1) "a")))
         (Single (Size 1) "h"))
 
@@ -70,7 +70,7 @@ _      !!? i | i < 0    = Nothing
 (x:xs) !!? i            = xs !!? (i-1)
 
 jlToList :: JoinList m a -> [a]
-jlToList Empty            = []
+jlToList Out            = []
 jlToList (Single _ a)     = [a]
 jlToList (Append _ l1 l2) = jlToList l1 ++ jlToList l2
 
@@ -103,7 +103,7 @@ testTakeJ
 -- 1.
 
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
-indexJ _ Empty                  = Nothing
+indexJ _ Out                  = Nothing
 indexJ i _  | i < 0             = Nothing
 indexJ 0 (Single _ a)           = Just a
 indexJ i (Single _ _)           = Nothing
@@ -113,22 +113,22 @@ indexJ i (Append b jl1 jl2)
 
 -- Returns size of a JoinList
 sizeOf :: (Sized b, Monoid b) => JoinList b a -> Int
-sizeOf Empty  = 0
+sizeOf Out  = 0
 sizeOf jl     = getSize $ size (tag jl) 
  
 -- 2.
 
 dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
 dropJ i jl | i < 1      = jl
-dropJ _ Empty           = Empty
-dropJ i (Single _ _)    = Empty
+dropJ _ Out           = Out
+dropJ i (Single _ _)    = Out
 dropJ i (Append b jl1 jl2) = dropJ (i-1) jl2 
 
 -- 3.
 
 takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
-takeJ _ Empty               = Empty 
-takeJ i _ | i < 1           = Empty
+takeJ _ Out               = Out 
+takeJ i _ | i < 1           = Out
 takeJ _ (Single b a)        = Single b a
 takeJ i (Append b jl1 jl2)  = takeJ i jl1 +++ takeJ (i-1) jl2 
 
@@ -142,13 +142,13 @@ takeJ i (Append b jl1 jl2)  = takeJ i jl1 +++ takeJ (i-1) jl2
 --                   (Single (Score 97,Size 12) " Archive Foundation, how to help produce our new eBooks, and how to ") 
 --                   (Append (Score 74,Size 10) 
 --                       (Single (Score 74,Size 10) " subscribe to our email newsletter to hear about new eBooks.") 
---                       Empty
+--                       Out
 --                   )
 --               )
 --           ))
 
     -- replaceLine n s jl    = replaceLine' (takeJ n jl) (dropJ n jl)
-    --     where replaceLine' pre Empty    = pre
+    --     where replaceLine' pre Out    = pre
     --           replaceLine' pre post     = pre +++ (Single (scoreString s, Size (length $ words s)) s) +++ post
 
 

@@ -1,10 +1,8 @@
-import Control.Applicative
+import Debug.Trace
 
-xRolls :: [Integer]
-xRolls = [6, 2, 2]
 
-yRolls :: [Integer]
-yRolls = [5, 2, 1, 1, 2]
+x :: Integer
+x = 1
 
-f :: [Ordering]
-f = getZipList $ compare <$> ZipList xRolls <*> ZipList yRolls
+f :: Integer
+f = (trace ("here's x" ++ show x) x) + 1

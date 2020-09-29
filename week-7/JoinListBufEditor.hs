@@ -14,7 +14,7 @@ newJL :: String -> JoinList (Score, Size) String
 newJL s = Single (scoreString s, Size (length $ words s)) s
 
 testBuffer :: JoinList (Score, Size) String
-testBuffer =  foldl (\acc line -> newJL line +++ acc) Empty (reverse (lines testString)) 
+testBuffer =  foldl (\acc line -> newJL line +++ acc) Out (reverse (lines testString)) 
 
 -- Append (Score 346,Size 40) 
 --     (Single (Score 88,Size 8) "This Web site includes information about Project Gutenberg-tm, ") 
@@ -24,7 +24,7 @@ testBuffer =  foldl (\acc line -> newJL line +++ acc) Empty (reverse (lines test
 --                 (Single (Score 97,Size 12) " Archive Foundation, how to help produce our new eBooks, and how to ") 
 --                 (Append (Score 74,Size 10) 
 --                     (Single (Score 74,Size 10) " subscribe to our email newsletter to hear about new eBooks.") 
---                     Empty
+--                     Out
 --                 )
 --             )
 --         )
