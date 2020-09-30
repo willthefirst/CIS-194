@@ -1,101 +1,64 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
--- Noise is just an integer.
--- Customers are just a list of noises.
-
-type Noise = Integer
-type Customers = [Noise] 
-
-addNoise :: Noise -> Customers -> Customers
-addNoise n cs = cs ++ [n]
-
--- Helper function so that we can write some lovely chains.
-x -: f = f x
-
--- [10] -: addNoise 30 -: addNoise 40
-
+-- Haskell lets us describe things nicely using datatypes.
+-- In this case, let's say a Bar can either be Closed or Serving a, where a could be anything: int, string, etc. 
 data Bar a = Closed | Serving a
     deriving Show
 
-addNoise' :: Noise -> Customers -> Bar Customers
-addNoise' n cs 
-    | sum newCustomers > 100 = Closed 
-    | otherwise              = Serving newCustomers
-        where newCustomers = cs ++ [n]
+openBar :: Bar [String]
+openBar = Serving ["taro", "dan", "jacob"]
+closedBar = Closed
 
--- addNoise' 10 [20, 30]
--- addNoise' 10 [20, 30, 60]
+-- Cool. So how can I add a customer to the bar? Unfortunately, this won't work:
 
--- But now, we can't chain our functions together. How can we both use our lovely new datatype AND chain our functions?
+-- newBar = openBar ++ ["jim"]
+            -- (Bar [String])  [String]
+-- (++) expects list types, and doesn't know what to do with a `Bar [String]`
+
+-- So how can we do this simple thing while preserving our lovely `Bar` datatype?
+-- Enter: functors
 
 instance Functor Bar where
-    fmap f Closed = Closed
-    fmap f (Serving a) = Serving (f a)
--- todo: what does ^this^ definition allow us to do?
+    fmap f Closed       = Closed
+    fmap f (Serving a)  = Serving (f a)
 
+-- Let's also write a little that adds a single customer to the bar.
+addCustomers :: [String] -> Bar [String] -> Bar [String]
+addCustomers customers bar = fmap (++ customers) bar
+
+openBar' = addCustomers ["jim"] openBar
+closedBar' = addCustomers ["jim"] closedBar
+
+-- OK LOVELY. Now I want a function that will move all the folks from one bar to another bar.
+-- For this, I need applicatives.
+-- (show why you can't accomplish this purely with fmap) 
 instance Applicative Bar where
     pure f = Serving f 
     Closed <*> f = Closed
     Serving f <*> x = fmap f x
--- todo: what does ^this^ definition allow us to do?
+
+-- Move all the customers from one bar to another bar
+addCustomers' :: Bar [String] -> Bar [String] -> Bar [String]
+addCustomers' b1 b2 = fmap (++) b1 <*> b2
+-- todo: This part feels like a bit of a leap, that function is doing some trickery that might be hard to explain.
+
+a = addCustomers' (Serving (["jim"])) (Serving ["taro"])
+
+-- OK lovely. Functors would let us apply unwrapped values to wrapped values, and now applicatives will let us apply wrapped values to wrapped values.
+-- But realistically, customers will be coming all night, and I'll have to call this function repeatedly, chained, if you will.
+
+x = addCustomers' (Serving ["jacob"]) (addCustomers' (Serving ["jim"]) (Serving ["taro"]))
 
 instance Monad Bar where  
     return x        = Serving x  
     Closed >>= f    = Closed  
     Serving x >>= f = f x  
 
--- return [20] >>= addNoise' 30 >>= addNoise' 50
+addCustomers'' :: [String] -> [String] -> Bar [String]
+addCustomers'' customers bar = 
+    if length (customers ++ bar) < 100 then
+        Serving (customers ++ bar)
+    else
+        Closed
 
-
-
--- -- x = Noise 10
--- -- y = Shh
-
--- -- But what if I want to do something with that "wrapped value"?
--- -- For example, I can't do this because of the type mismatch:
-
--- -- volumeUpdate = (Noise 10) + 30
--- -- volumeUpdate2 = (Noise 10) + (Noise 40)
-
--- -- I want to write a function that will "add noise" to the room.
--- -- But how do I add to this special wrapped type?
--- -- Functors, baby.
-
--- instance Functor Volume where
---     fmap f Shh        = Shh
---     fmap f (Noise x)  = Noise (f x) 
-
-
-
--- -- chainedEx1 = addNoise 10 (addNoise 10 (Noise 30))
--- -- chainedEx2 = Noise 10 -: addNoise 30 -: addNoise 50
-
--- -- However, when the volume exceeds 100, we get a Shh. We need to represent this.
--- -- Let's update our `addNoise` function:
-
--- addNoise2 :: Integer -> Volume Integer -> Volume Integer
--- addNoise2 n v
---     | fmap (>100) (fmap (+n) v) = Shh
-
-
-
-
--- -- But I'd also like to be able to combine these nice data types.
--- -- For example, this won't work:
--- -- x'' = fmap (+ (Noise 10)) Noise 20
--- -- How do I do this? Applicatives.
-
--- instance Applicative Volume where
---     pure f                = Noise f 
---     Shh <*> _             = Shh
---     Noise f <*> something  = fmap f something
-
--- -- j :: Volume Integer
--- -- j = (Noise (+10)) <*> Noise 20
--- -- j2 = fmap (+) (Noise 30) <*> (Noise 90)
-
--- -- OK sweeet. Now I can add these datatypes together.
--- -- 
-
--- instance Monad Volume where
---     return f = Noise fy
+y = return ["ads"] >>= addCustomers'' ["taro"]
