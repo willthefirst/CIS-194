@@ -1,29 +1,33 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
--- Noise is just a number.
+-- Noise is just an integer.
 -- Customers are just a list of noises.
 
 type Noise = Integer
 type Customers = [Noise] 
 
--- If we try to run the check using fmap, we run into type trouble
 addNoise :: Noise -> Customers -> Customers
 addNoise n cs = cs ++ [n]
 
 -- Helper function so that we can write some lovely chains.
 x -: f = f x
 
+-- [10] -: addNoise 30 -: addNoise 40
+
 data Bar a = Closed | Serving a
     deriving Show
 
--- If we try to run the check using fmap, we run into type trouble
 addNoise' :: Noise -> Customers -> Bar Customers
 addNoise' n cs 
     | sum newCustomers > 100 = Closed 
     | otherwise              = Serving newCustomers
         where newCustomers = cs ++ [n]
 
+-- addNoise' 10 [20, 30]
+-- addNoise' 10 [20, 30, 60]
+
 -- But now, we can't chain our functions together. How can we both use our lovely new datatype AND chain our functions?
+
 instance Functor Bar where
     fmap f Closed = Closed
     fmap f (Serving a) = Serving (f a)
@@ -36,9 +40,9 @@ instance Applicative Bar where
 -- todo: what does ^this^ definition allow us to do?
 
 instance Monad Bar where  
-    return x = Serving x  
-    Closed >>= f = Closed  
-    Serving x >>= f  = f x  
+    return x        = Serving x  
+    Closed >>= f    = Closed  
+    Serving x >>= f = f x  
 
 -- return [20] >>= addNoise' 30 >>= addNoise' 50
 
