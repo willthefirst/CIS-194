@@ -67,4 +67,4 @@ y = return ["ads"] >>= addCustomers'' ["taro"] >>= addCustomers'' ["will", "jaco
 -- When working with types, we want to run functions on the information that the type "contains."
 -- Functors: allow us to run a function on the contents of a type, returning something of that type.
 -- Applicatives: allow us to the contents of a type on the contents of another type.
--- Monads: allows us to feed the contents of a type into a function that doesn't accept that type.
+-- Monads: allows us to feed the contents of a type into a function that doesn't accept that type  
