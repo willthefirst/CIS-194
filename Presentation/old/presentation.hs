@@ -67,4 +67,42 @@ y = return ["ads"] >>= addCustomers'' ["taro"] >>= addCustomers'' ["will", "jaco
 -- When working with types, we want to run functions on the information that the type "contains."
 -- Functors: allow us to run a function on the contents of a type, returning something of that type.
 -- Applicatives: allow us to the contents of a type on the contents of another type.
--- Monads: allows us to feed the contents of a type into a function that doesn't accept that type  
+-- Monads: allows us to feed the contents of a type into a function that doesn't accept that type
+
+data Milk a = Spill | Cup a
+    deriving Show
+
+instance Functor Milk where
+    fmap f Spill    = Spill
+    fmap f (Cup a)  = Cup (f a)
+
+instance Applicative Milk where
+    pure f = Cup f 
+    Spill <*> f = Spill
+    Cup f <*> x = fmap f x
+
+instance Monad Milk where  
+    return x    = Cup x  
+    Spill >>= f = Spill  
+    Cup x >>= f = f x  
+
+pour5 :: Integer -> Milk Integer
+pour5 i =
+    if (i > 10) then
+        Spill
+    else
+        return (i + 5)
+
+drink = return 0 >>= pour5 >>= pour5 >>= pour5 >>= pour5
+
+-- Without the monad
+
+pour5'  :: Milk Integer -> Milk Integer
+pour5' Spill = Spill
+pour5' (Cup i) = 
+    if i > 10 then Spill
+    else Cup (i + 10)
+
+x -: f = f x
+
+drink' = Cup 0 -: pour5' -: pour5'
